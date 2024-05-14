@@ -17,7 +17,7 @@ from sklearn.utils.extmath import stable_cumsum
 from sklearn.utils.sparsefuncs import count_nonzero
 from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.preprocessing import label_binarize
-from HORIZON.CVmortalityPred_inHF.ModelPkg.encode_sklearn import _encode, _unique
+from ModelPkg.encode_sklearn import _encode, _unique
 
 def noSepMask(tokens, token2idx):
     output_label = []

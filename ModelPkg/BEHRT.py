@@ -1,5 +1,5 @@
-from HORIZON.CVmortalityPred_inHF.pytorch_pretrained_bert.module import BertModel
-import HORIZON.CVmortalityPred_inHF.pytorch_pretrained_bert as Bert
+from pytorch_pretrained_bert.module import BertModel
+import pytorch_pretrained_bert as Bert
 
 import os
 import argparse

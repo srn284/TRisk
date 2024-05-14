@@ -11,8 +11,8 @@ import random
 import numpy as np
 import torch
 
-from HORIZON.CVmortalityPred_inHF.ModelPkg.utils import *
-from HORIZON.CVmortalityPred_inHF.ModelPkg.CPHloss import *
+from ModelPkg.utils import *
+from ModelPkg.CPHloss import *
 
 
 

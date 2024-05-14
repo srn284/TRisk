@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-import HORIZON.CVmortalityPred_inHF.pytorch_pretrained_bert as Bert
+import pytorch_pretrained_bert as Bert
 
 import os
 import argparse
@@ -13,7 +13,7 @@ from torch.nn import functional as F
 from torchvision import datasets, transforms
 from torchvision.utils import save_image
 
-from HORIZON.CVmortalityPred_inHF.ModelPkg.CPHloss import *
+from ModelPkg.CPHloss import *
 
 
 import os
