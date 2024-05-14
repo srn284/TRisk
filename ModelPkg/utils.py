@@ -19,6 +19,29 @@ from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.preprocessing import label_binarize
 from ModelPkg.encode_sklearn import _encode, _unique
 
+
+def collate_fn(batch):
+    """
+       data: is a list of tuples with (example, label, length)
+             where 'example' is a tensor of arbitrary shape
+             and label/length are scalars
+    """
+    newb = []
+    for x in zip(*batch):
+        newb.append(np.array([np.array(elem) for elem in x]))
+    newbatch = []
+    idx = np.argsort(newb[-3].flatten())
+    row = np.arange(len(batch))
+    for i, x in enumerate(newb):
+        temp = x[idx]
+        newbatch.append(temp)
+
+    age_ids, input_ids, posi_ids, segment_ids, attMask, time2event, label, labelfloat = newbatch
+    return torch.LongTensor(age_ids), torch.LongTensor(input_ids), torch.LongTensor(posi_ids), torch.LongTensor(
+        segment_ids), \
+        torch.LongTensor(attMask), torch.FloatTensor(time2event), torch.LongTensor(label), torch.FloatTensor(labelfloat)
+
+
 def noSepMask(tokens, token2idx):
     output_label = []
     output_token = []
