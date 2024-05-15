@@ -7,9 +7,7 @@ from lifelines.utils import concordance_index
 
 
 def cindex(pred, event, time):
-#     event = torch.cat(event, dim=0).view(-1).numpy()
-#     time = torch.cat(time, dim=0).view(-1).numpy()
-#     partial_hazard = torch.exp(torch.cat(pred, dim=0).view(-1)).numpy()
+
     partial_hazard = torch.exp(pred).numpy()
     time = time.numpy()
     event = event.numpy()

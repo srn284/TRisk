@@ -200,14 +200,3 @@ class BEHRT_DeepSurv(Bert.modeling.BertPreTrainedModel):
             loss_fct = CoxPHLoss()
             
             return  logits, loss_fct(logits.view(-1,1), time2event.view(-1,1), labelfloat.view(-1,1))
-        # logits = self.classifier(pooled_output)
-        # if labels is not None:
-        #     loss_fct = nn.BCEWithLogitsLoss()
-        #     loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1, self.num_labels))
-        #     return loss, logits
-        # else:
-        #     return logits
-        # return pooled_output
-
-        
-        

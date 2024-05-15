@@ -210,7 +210,6 @@ class Binary_DeepSurvDataset(Dataset):
         age = seq_padding(age, self.max_len, token2idx=self.age2idx)
 
         tokens, code = code2index(code, self.vocab)
-        #         _, label = code2index(label, self.vocab)
 
         # get position code and segment code
         tokens = seq_padding(tokens, self.max_len)
@@ -221,14 +220,81 @@ class Binary_DeepSurvDataset(Dataset):
 
         # pad code and label
         code = seq_padding(code, self.max_len, symbol=self.vocab['PAD'])
-        #         label = seq_padding(label, self.max_len, symbol=-1)
-#         print(code)
-#         print(torch.LongTensor(age), torch.LongTensor(code), torch.LongTensor(position), torch.LongTensor(segment), \
-#                torch.LongTensor(mask), torch.LongTensor(self.time2event[index]), torch.LongTensor( self.label[index])
-        
-        
+
         return torch.LongTensor(age), torch.LongTensor(code), torch.LongTensor(position), torch.LongTensor(segment), \
                torch.LongTensor(mask), torch.FloatTensor([self.time2event[index]]), torch.LongTensor( [self.label[index]]),torch.FloatTensor( [self.label[index]])
-        
+
+
+class SODENXcal_DataLoader(Dataset):
+
+    #     def __init__(self, mnist_dataset, time, event):
+    #         self.mnist_dataset = mnist_dataset
+    #         self.time, self.event = tt.tuplefy(time, event).to_tensor()
+    def __init__(self, token2idx, dataframe, max_len, max_age=110, year=False, age_symbol=None, min_visit=5):
+        # dataframe preproecssing
+        # filter out the patient with number of visits less than min_visit
+        self.vocab = token2idx
+        self.max_len = max_len
+        self.code = dataframe.code
+        self.age = dataframe.age
+        #         self.label = dataframe.label
+        self.age2idx, _ = age_vocab(max_age, year, symbol=age_symbol)
+        self.gender = 0
+        self.region = 0
+        self.time2event = dataframe.time2event
+        self.label = dataframe.label
+        self.patid = dataframe.patid
+        self.baselineage = dataframe.baselineage
+
+    #         self.time2event, self.label = tt.tuplefy(dataframe.time2event.values, dataframe.label.values).to_tensor()
+
+    def __len__(self):
+        return len(self.code)
+
+    def __getitem__(self, index):
+
+        age = self.age[index]
+        bage = self.baselineage[index]
+        code = self.code[index]
+        label = self.label[index]
+        gender = int(self.gender)
+        region = int(self.region)
+        # extract data
+        age = age[(-self.max_len + 1):]
+        code = code[(-self.max_len + 1):]
+
+        # avoid data cut with first element to be 'SEP'
+        if code[0] != 'SEP':
+            code = np.append(np.array(['CLS']), code)
+            age = np.append(np.array(str(bage)), age)
+        else:
+            code[0] = 'CLS'
+            age[0] = str(bage)
+
+        # mask 0:len(code) to 1, padding to be 0
+        mask = np.ones(self.max_len)
+        mask[len(code):] = 0
+
+        # pad age sequence and code sequence
+        age = seq_padding(age, self.max_len, token2idx=self.age2idx)
+
+        tokens, code = code2index(code, self.vocab)
+
+        # get position code and segment code
+        tokens = seq_padding(tokens, self.max_len)
+        position = position_idx(tokens)
+        segment = index_seg(tokens)
+        position[0] = position[-1] + 1
+        segment[0] = 1
+
+        # pad code and label
+        code = seq_padding(code, self.max_len, symbol=self.vocab['PAD'])
+
+        return torch.LongTensor(age), torch.LongTensor(code), torch.LongTensor(position), torch.LongTensor(segment), \
+            torch.LongTensor(mask), torch.FloatTensor([self.time2event[index]]), torch.LongTensor(
+            [int(self.patid[index])]), torch.FloatTensor([self.label[index]])
+
+
+
         
 

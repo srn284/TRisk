@@ -69,9 +69,7 @@ def adam_surv(params, config=None):
     return optim
 def make_net(input_size, hidden_size, num_layers, output_size, dropout=0,
              batch_norm=False, act="relu", softplus=True):
-    #     if act == "selu":
-    #         ActFn = nn.SELU
-    #     else:
+
     ActFn = nn.ELU
     modules = [nn.Linear(input_size, hidden_size), ActFn()]
     if batch_norm:
@@ -157,10 +155,6 @@ class ContextRecMLPODEFunc(BaseSurvODEFunc):
             y.index_select(-1, torch.tensor(range(1, y.size(-1))).to(device))
         )
 
-        #         if len(zeros.shape)==1:
-        #             zeros = zeros.unsqueeze(0)
-
-        #         print(output.shape, zeros.shape)
         output = torch.cat([output, zeros], dim=1)
         if self.batch_time_mode:
             return output
@@ -213,11 +207,7 @@ class NonCoxFuncModel(nn.Module):
         outputs["lambda"] = self.odefunc(t[1:], outputs["Lambda"]).squeeze()
         outputs["Lambda"] = outputs["Lambda"][:, 0]
         outputs["lambda"] = outputs["lambda"][:, 0] / orig_t
-        #         print('lambda', outputs["lambda"].shape )
-        #         print('lambda', outputs["lambda"] )
-        #         print('lambd_exp', torch.exp(outputs["lambda"] ))
 
-        #         if not self.training:
         self.odefunc.set_batch_time_mode(False)
         ones = torch.ones_like(orig_t)
 
@@ -229,7 +219,6 @@ class NonCoxFuncModel(nn.Module):
         t_min = 1
         t_max = self.model_config.time_nums
         maxsteps = t_max
-        #             print(maxsteps)
         t = torch.linspace(
             t_min, t_max, maxsteps, dtype=init_cond.dtype,
             device=device)
@@ -238,33 +227,6 @@ class NonCoxFuncModel(nn.Module):
         outputs["hazard_seq"] = (1 - torch.exp(-odeint(self.odefunc, init_cond, t, rtol=1e-4,
                                                        atol=1e-8))[1:, :, 0]).transpose(1, 0)
 
-        #         outputs["hazard_seq"] = ((-odeint(self.odefunc, init_cond, t, rtol=1e-4,
-        #                     atol=1e-8))[1:, :, 0]   ).transpose(1,0)
-
-        #         print('outputs["hazard_seq"]', outputs["hazard_seq"])
-        #         else:
-        #             self.odefunc.set_batch_time_mode(False)
-        #             ones = torch.ones_like(orig_t)
-
-        #             t = self.model_config.time_nums * ones
-        #             init_cond = orig_init_cond
-        #             features = orig_features
-        #             init_cond = torch.cat(
-        #                 [init_cond.view(-1, 1), t.view(-1, 1), features],
-        #                 dim=1)
-        #             t_min = 1
-        #             t_max = self.model_config.time_nums
-        #             maxsteps = t_max
-        #     #             print(maxsteps)
-        #             t = torch.linspace(
-        #                 t_min, t_max, maxsteps, dtype=init_cond.dtype,
-        #                 device=device)
-        #             t = torch.linspace(min(all_times),max(all_times), properBins+1)[:-1]
-
-        #             t = torch.cat([torch.zeros([1]).to(device), t], dim=0)
-        #             t = t / t_max
-        #             outputs["hazard_seq"] =  (1 - torch.exp (-odeint(self.odefunc, init_cond, t, rtol=1e-4,
-        #                         atol=1e-8))[1:, :, 0]   ).transpose(1,0)
         return outputs
 
 
@@ -325,13 +287,12 @@ class BertEmbeddings(nn.Module):
         age_embed = self.age_embeddings(age_ids)
         posi_embeddings = self.posi_embeddings(posi_ids)
         seg_embed = self.posi_embeddings(seg_ids)
-
+        # no year embed used here!
         if self.config.concat_embeddings:
             embeddings = self.tanh(self.catmap(torch.cat((word_embed, age_embed, posi_embeddings), dim=2))) + seg_embed
 
         else:
             embeddings = word_embed + seg_embed + age_embed + posi_embeddings
-        #         embeddings = word_embed + age_embed + posi_embeddings + seg_embed
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
         return embeddings
@@ -482,14 +443,7 @@ class BEHRT_SODENXcal(Bert.modeling.BertPreTrainedModel):
         outfull = logits['hazard_seq']
 
         return outlog, outfull, loss_fct(logits, labelfloat.view(-1))
-        # logits = self.classifier(pooled_output)
-        # if labels is not None:
-        #     loss_fct = nn.BCEWithLogitsLoss()
-        #     loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1, self.num_labels))
-        #     return loss, logits
-        # else:
-        #     return logits
-        # return pooled_output
+
 
 
 def get_bin_for_time(tte, bin_boundaries):
@@ -508,9 +462,7 @@ def get_bin_for_time(tte, bin_boundaries):
 def cat_bin_target(tte, label, bin_boundaries, global_params):
     is_alive = label
     tte = tte
-    #     print('test' , tte.shape, is_alive.shape)
     bin_boundaries = torch.tensor(bin_boundaries).to(global_params['device'])
-    #     tte, is_alive = tgt[:, 0].unsqueeze(-1), tgt[:, 1].unsqueeze(-1)
 
     batch_sz = tte.size()[0]
 
@@ -541,8 +493,6 @@ def cat_bin_target(tte, label, bin_boundaries, global_params):
     max_bin = len(bin_boundaries) - 1.
     not_max_bin = (tte_cat < max_bin).long()
     is_alive = (is_alive * not_max_bin)
-    #     print('shapes imp' , tte_cat.shape, is_alive.shape, ratio.shape)
-
     tgt = torch.cat((tte_cat, is_alive, ratio), dim=-1)
     tgt = tgt.to(global_params['device'])
     return tgt
@@ -648,10 +598,8 @@ def d_calibration(points, is_alive, nbins=20, differentiable=False, gamma=10000.
 
 
 def compute_xcal(pred_params, tgt, global_params):
-    #     cdf = tgt
     cdf = get_cdf_val(pred_params, tgt, global_params)
-    #     print('cdf output, ' , cdf.shape)
-    #     print('cdf output, ' , cdf)
+
 
     # ratio not used here, no need to check for 3rd dim
     tte, is_alive = tgt[:, 0], tgt[:, 1]
@@ -671,8 +619,7 @@ def get_cdf_val(pred_params, tgt,global_params):
 
     tte, is_alive, ratio = tgt[:, 0], tgt[:, 1], tgt[:, 2]
     cdf = pred.cdf(tte, ratio)
-    #         tte, is_alive  = tgt[:, 0], tgt[:, 1]
-    #         cdf = pred.cdf(tte + 1e-4)
+
     return cdf
 
 
@@ -721,54 +668,19 @@ class CatDist():
         Linear Interpolation for CDF
         '''
         # compute some masks
-        # 1's up to but not including correct bin, then zeros
-        #         mask1 = (times > indices).float()
-        #         # 1 up to and including correct bin, then zeros
-        #         mask2 = (times >= indices).float()
 
-        #         all_probs = params
-        #         all_probs = all_probs[1:]- all_probs[]
         nonzeroindex = (times != 0).long()
 
         mask1 = ((times - 1) == indices).float()
-
-        # 1's up to but not including correct bin, then zeros
-
-        #         mask1 = ((times-1)==indices).float()
-        #         mask2 = (times==indices).float()
-        #         mask3 = ((times-2)==indices).float()
-        #         mask1 = (( times-(1*nonzeroindex))== indices).float()
         # 1 up to and including correct bin, then zeros
         mask2 = (times == indices).float()
-        #         mask3 = ((times-2)==indices).float()
         all_probs = params
-        #         global_params['params'] = params
-        #         global_params['mask2'] = mask2
-
-        #         global_params['mask1'] = mask1
-        #         global_params['times'] = times
-        #         global_params['indices'] = indices
-
-        #         all_probs = torch.softmax(params, dim=-1)
-        #         print("all prpobs ,  ",all_probs, all_probs.shape )
-
-        #         cdf_km1 = (all_probs * mask1).sum(dim=-1)
-        #         cdf_km1 = (all_probs * mask1).sum(dim=-1)  - (all_probs * mask3).sum(dim=-1)
-
-        #         print('nonzeroindex'  ,nonzeroindex)
-        #         print('nonzeroindex shaep' , nonzeroindex.shape, times.shape)
-        #         prob_k = all_probs[range(batch_sz), times.squeeze()]-(all_probs[range(batch_sz),( times-(1*nonzeroindex)).squeeze()])
         prob_k = all_probs[range(batch_sz), times.squeeze()] - (
                     nonzeroindex.squeeze() * all_probs[range(batch_sz), (times - (1 * nonzeroindex)).squeeze()])
         cdf_km1 = (all_probs * mask1).sum(dim=-1)
 
         cdf_k = (all_probs * mask2).sum(dim=-1)
-        #         cdf_k = (all_probs * mask2).sum(dim=-1) -  (all_probs * mask1).sum(dim=-1)
-        #         global_params['cdf_k'] = cdf_k
-        #         global_params['prob_k'] = prob_k
-        #         global_params['cdf_km1'] = cdf_km1
-        #         print('cdf_km1 + prob_k * ratio shape' , (cdf_km1 + prob_k * ratio).shape)
-        #         print('assesrtion check ' , (cdf_k - (cdf_km1 + prob_k)))
+
         assert torch.all((cdf_k - (cdf_km1 + prob_k)).abs() < 1e-4)
 
         if not self.interpolate:
@@ -801,7 +713,6 @@ class CatDist():
                 print('probs is nan', bad(probs))
 
             interpolated_cdf = probs
-            #             print('interpolated probs',interpolated_cdf)
             return interpolated_cdf
 
 
@@ -813,62 +724,16 @@ def get_bin_boundaries(train, dl_train):
     all_times = []
     all_is_alive = []
 
-    #     for step, batch in enumerate(dl_train):
-    #         age_ids, input_ids, posi_ids, segment_ids, attMask, time2event, label, labelfloat = batch
-    #         tte = time2event
-    #         is_alive = labelfloat
-    #         all_times.append(tte)
-    #         all_is_alive.append(is_alive)
-    #         if step%100==0:
-    #             print(step)
-    # #     train_loader = util.get_train_loader(args)
-
-    #     # for src, tgt, extra_surv_t, extra_censor_t in train_loader:
-    #     # dont need ratio, ignoring 3rd dim of target
-    #     for src, tgt in train_loader:
-    #         tte = tgt[:, 0]
-    #         is_alive = tgt[:, 1]
-    #         all_times.append(tte)
-    #         all_is_alive.append(is_alive)
-
     all_times = torch.tensor(train.time2event.values)
     all_is_alive = torch.tensor(train.label.values).long()
     all_times_censored = all_times[all_is_alive == 1].cpu().numpy()
     all_times = all_times[all_is_alive == 0]
     all_times = all_times.cpu().numpy()
     print(np.unique(all_times))
-    #     percents = np.arange(properBins+1) * 100./(properBins)
-    #     print('percent: ', percents)
-    # BIN Boundaries has shape num_cat_bins+1.
-    #     bin_boundaries = np.percentile(all_times, percents)
-    #     bin_boundaries = np.linspace(0,   ( int((max(all_times)+1)/6 )*6), int((max(all_times)+1)/6)+1)
     bin_boundaries = np.linspace(min(all_times) - 1, max(all_times), max(all_times) + 1)
-    #     print("percentile bin boundaries:",bin_boundaries)
     print("bin boundaries", bin_boundaries)
     mid_points = (bin_boundaries[1:] + bin_boundaries[:-1]) / 2.
-    #     if args.phase == 'test':
-    #         # get marginal counts
-    #         lower_boundaries = bin_boundaries[1:-1].reshape(1, -1)
-    #         # add counts for uncensored points
-    #         all_times = all_times.reshape(-1, 1)
-    #         tte_bins_uncensored = (all_times > lower_boundaries).sum(axis=-1).astype(float)
-    #         tte_bins_uncensored_counts = np.unique(tte_bins_uncensored, return_counts=True)[1]
 
-    #         # add counts/num_bins above censored times for censored points
-    #         all_times_censored = all_times_censored.reshape(-1,1)
-    #         tte_bins_censored = (all_times_censored > lower_boundaries).sum(axis=-1).astype(float)
-    #         tte_bins_censored = tte_bins_censored.reshape(-1, 1)
-    #         indices = np.arange(args.num_cat_bins).reshape(1,-1)
-    #         mask = (tte_bins_censored  <= indices).astype(float)/(args.num_cat_bins - tte_bins_censored)
-
-    #         tte_bins_censored_counts = np.sum(mask, axis=0)
-
-    #         marginal_counts = tte_bins_uncensored_counts + tte_bins_censored_counts
-
-    #         # Use log since it's inputs to the softmax
-    #         marginal_counts = np.log(marginal_counts)
-    #         return bin_boundaries, mid_points, marginal_counts
-    #     else:
     return bin_boundaries, mid_points
 
 

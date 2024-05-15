@@ -480,16 +480,7 @@ class BEHRT_SODEN(Bert.modeling.BertPreTrainedModel):
         
 
         return  outlog, loss_fct(logits ,  labelfloat.view(-1))
-        # logits = self.classifier(pooled_output)
-        # if labels is not None:
-        #     loss_fct = nn.BCEWithLogitsLoss()
-        #     loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1, self.num_labels))
-        #     return loss, logits
-        # else:
-        #     return logits
-        # return pooled_output
 
-        
         
 
         
