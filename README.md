@@ -6,7 +6,7 @@ Shishir Rao, Yikuan Li, Mohammad Mamouei, Gholamreza Salimi-Khorshidi, Malgorzat
 
 A Transformer-based survival model for point-of-care prediction of all-cause mortality in heart failure patients: a multi-cohort study<br/>
 Shishir Rao, Gholamreza Salimi-Khorshidi, Christopher Yau, Huimin Su, Nathalie Conrad, Mark Woodward, John GF Cleland, Kazem Rahimi<br/>
-![Screenshot](TRisk2png.png)
+![Screenshot](triskmodel.png)
 
 How to use:<br/>
 In "Demo" folder, run the "demoTRisk.ipynb" file. A "forDemoTRisk2.parquet" file is provided to test/play and demonstrate how the vocabulary/year/age/etc function. The model has no pre-trained weights here but can fully run on the sampel (synthetic) cohort of 3000 patients. The files in the "ModelPkg" folder contain model and data handling packages in addition to other necessary relevant files and helper functions.<br/>
