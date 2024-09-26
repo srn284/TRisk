@@ -1,10 +1,10 @@
 # TRisk
 Repository for TRisk model<br/>
 Manuscripts (in preparation) associated: <br/>
-Refined selection of individuals for preventive cardiovascular disease treatment with a Transformer-based risk model<br/>
+"Refined selection of individuals for preventive cardiovascular disease treatment with a Transformer-based risk model"<br/>
 Shishir Rao, Yikuan Li, Mohammad Mamouei, Gholamreza Salimi-Khorshidi, Malgorzata Wamil, Milad Nazarzadeh, Christopher Yau, Gary S Collins, Rod Jackson, Andrew Vickers, Goodarz Danaei, Kazem Rahimi.<br/><br/>
 
-A Transformer-based survival model for point-of-care prediction of all-cause mortality in heart failure patients: a multi-cohort study<br/>
+"A Transformer-based survival model for point-of-care prediction of all-cause mortality in heart failure patients: a multi-cohort study"<br/>
 Shishir Rao, Gholamreza Salimi-Khorshidi, Christopher Yau, Huimin Su, Nathalie Conrad, Mark Woodward, John GF Cleland, Kazem Rahimi<br/>
 ![Screenshot](triskmodel.png)
 
