@@ -19,3 +19,5 @@ numpy 1.19.2<br/>
 sklearn 0.23.2<br/>
 pandas 1.1.3<br/>
 <br/>
+
+Acknowledgement: packages that made this work possible: BERT, SODEN (SODEN: A Scalable Continuous-Time Survival Model through Ordinary Differential Equation Networks) by Jiaqima, X-Cal (explicit calibration) by Rajesh-Lab.<br/>
