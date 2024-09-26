@@ -1,0 +1,19 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: TRisk
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Shishir
+    name-particle: Shishir
+    family-names: Rao
+    email: shishir.rao@wrh.ox.ac.uk
+identifiers:
+  - type: url
+    value: 'https://github.com/srn284/TRisk'
+abstract: |
+  Repository for TRisk model
